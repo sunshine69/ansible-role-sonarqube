@@ -1,0 +1,13 @@
+## File: tasks/main.yml
+
+- name: Print a debug message that sonarqube role has been entered
+  debug:
+    msg: "Debug - This is the {{role_name}} role"
+
+
+- import_tasks: "install_client_linux.yml"
+  when: (ansible_distribution == 'Debian') or (ansible_distribution == 'Ubuntu')
+
+
+## vim: set tabstop=4 expandtab noai :
+## End of File

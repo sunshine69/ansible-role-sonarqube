@@ -1,0 +1,31 @@
+## defaults/main.yml
+
+sonarqube:
+  homepage: https://www.sonarqube.org/
+  softwarebucketpath: http://xvt-software.s3-website-ap-southeast-2.amazonaws.com/windows/sonar
+
+  installdirpath:
+    linux: /opt
+    windows: d:/
+
+  server:
+    installfile: sonarqube-6.7.1.zip
+    version: "6.7.1"
+    url: "http://sonarqube.xvt.technology:9000"
+    dbhost: localhost
+    dbname: sonardb
+    dbuser: TODO-or-see-Vault
+    dbpass: TODO-or-see-Vault
+
+  ## There are multiple clients: "sonar-scanner for [MSBuild|Maven|Gradle|Ant|..]"
+  client:
+    logintoken: TODO
+    msbuild:
+      installdir: /opt/sonar-scanner-msbuild
+      version: 4.0.2.892
+      ## MSBuild file contains a directory named sonar-scanner-<VERSION>
+      sonarscanner_version: 3.0.3.778
+
+
+## vim: set tabstop=4 expandtab noai :
+## End of File

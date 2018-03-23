@@ -1,0 +1,111 @@
+## File: tasks/install_client_linux.yml
+
+## FIXME: We might want the scanner on both Linux and Windows Remote Agents.
+## Should we have separate files (with duplicated tasks), or try and handle
+## both OSs in the one file... ?
+
+## Avoid having to use '..|default..' everywhere
+- name: If 'sonar_scanner_msbuild_version' is not defined, then assign it from defaults
+  set_fact:
+    sonar_scanner_msbuild_version: "{{ sonarqube.client.msbuild.version }}"
+  when: not sonar_scanner_msbuild_version is defined  or  sonar_scanner_msbuild_version == ""
+
+
+- name: Create download directory (/opt/downloads)
+  file:
+    state: directory
+    path: /opt/downloads
+    owner: root
+    group: root
+    mode: 0755
+
+
+## The MSBuild scanner needs mono to be installed
+- name: Update OS package cache, if it is more than 1 hour old
+  apt:
+    update_cache:       yes
+    cache_valid_time:   3600
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+#- name:     Install 'mono' package
+#  apt:
+#    name: mono
+#    state: "present"
+
+
+- name: Fetch sonarscanner for MSBuild version {{ sonar_scanner_msbuild_version }} zip file from S3 software bucket
+  get_url:
+    url: "{{ sonarqube.softwarebucketpath }}/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}.zip"
+    dest: "/opt/downloads/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}.zip"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create directory where sonar-scanner-msbuild will be unpacked
+  file:
+    state: directory
+    path: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Unzip sonarscanner within the /opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }} directory
+  unarchive:
+    src: "/opt/downloads/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}.zip"
+    remote_src: yes
+    dest: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}"
+    creates: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}/MSBuild.SonarQube.Runner.exe"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Make symlink /opt/sonar-scanner-msbuild pointing at version {{ sonar_scanner_msbuild_version }} directory
+  file:
+    state: link
+    src: "sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}"
+    dest: /opt/sonar-scanner-msbuild
+
+- name: Make symlink /opt/sonar-scanner-msbuild/sonar-scanner pointing at version {{ sonarqube.client.msbuild.sonarscanner_version }} directory
+  file:
+    state: link
+    src: "sonar-scanner-{{ sonarqube.client.msbuild.sonarscanner_version }}"
+    dest: /opt/sonar-scanner-msbuild/sonar-scanner
+
+- name: Replace SonarQube.Analysis.xml file with our templated version
+  template:
+    src: "SonarQube.Analysis.xml.j2"
+    dest: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}/SonarQube.Analysis.xml"
+    owner: "root"
+    group: "root"
+    mode: 0644
+    backup: yes
+  register: sonarqube_replace_analysis_file_output
+
+- name: Replace SonarQube.Analysis.xml file with our templated version
+  template:
+    src: "sonar-scanner.properties.j2"
+    dest: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}/sonar-scanner-{{ sonarqube.client.msbuild.sonarscanner_version }}/conf/sonar-scanner.properties"
+    owner: "root"
+    group: "root"
+    mode: 0644
+    backup: yes
+  register: sonarqube_replace_sonarproperties_file_output
+
+- name: Create directory to hold the Linux shim script, which the Bamboo plugin hardcodes
+  file:
+    state: directory
+    path: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}/linux/bin"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create shim shell script (MSBuild.SonarQube.Runner.exe) which uses mono to invoke the real EXE
+  template:
+    src: "MSBuild.SonarQube.Runner.exe.j2"
+    dest: "/opt/sonar-scanner-msbuild-{{ sonar_scanner_msbuild_version }}/linux/bin/MSBuild.SonarQube.Runner.exe"
+    owner: root
+    group: root
+    mode: 0755
+
+## vim: set tabstop=4 expandtab noai :
+## End of File

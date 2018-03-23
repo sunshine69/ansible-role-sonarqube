@@ -1,0 +1,80 @@
+#!/bin/bash
+
+## The Sonar Plugin for Bamboo adds two new tasks, namely a 'start' and 'end'
+## which need to be called with the MSBUILD call in the middle.
+## The Sonar tasks try and execute the .EXE file with various args.
+## As the name suggests, the EXE fie is a Windows executable binary.
+##
+## Obviously Linux agents cannot directly invoke Windows EXE files,
+## in which case Bamboo needs to be configured to point at a shim script,
+## which should have the same name as the EXE file, but which will
+## execute the real EXE file by invoking it via 'mono'.
+##
+## This file provides the shim script. It should be installed on
+## Linux Bamboo Remote Agents which will be used to build Windows apps.
+##
+## Note that the Bamboo plugin is configured with the sonarscanner location,
+## and it then appends "/bin/" and the exe file, to form the file path
+## So this script needs to be installed in a sub-dir named "bin".
+## eg. set the sonarscanner location to  /opt/sonar-scanner-msbuild/linux
+##     and then put this file in the dir /opt/sonar-scanner-msbuild/linux/bin
+##
+## andy.jones@xvt.com.au
+
+
+## Config option
+sonardir="{{ sonarqube.client.msbuild.installdir | default('/opt/sonar-scanner-msbuild') }}"
+## End of Config options
+
+
+
+myname=$( basename $0 )
+
+
+logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by user $( id )"
+
+
+## NB: Would prefer to log the actual args ($*), but they might contain a user token... (/d:sonar.login=...)
+if [ -f "${sonardir}/$myname" ]
+then
+	logger -p user.debug -t "$myname"  "PID=$$  Will use mono to execute $myname with $# args"
+else
+	logger -p user.notice -t "$myname"  "PID=$$  Warning: EXE file ($myname) does not to exist in dir \"$sonardir\". Will try and fail to execute it with $# args"
+fi
+
+
+## Ugh. The /k and /n args which are passed to us have embedded double quotes.
+## eg.   MSBuild.SonarQube.Runner.exe begin /d:sonar.host.url=http://52.63.205.184:9000 /d:sonar.login=****** /k:"TestAndy1" /n:"AndyHelloWorld" /v:"0.0.1"
+##
+## The EXE file's command line processing will error if sees a doublequote..
+## So, we need to reprocess the arguments, and remove any embedded quotes.
+## NB: I don't understand why this is not causing problems for other people.
+
+
+## The shortest, but non-preferred option, is to just invoke this 'eval'....
+#eval  mono  "${sonardir}/$myname"  "$@"
+
+
+## Since eval should always be a last resort, then let's use bash arrays instead
+cleansedargs=()
+argc=0
+for arg in "$@"
+do
+	thisarg=$( echo "$arg" | sed -e 's/"//g' )
+	cleansedargs[$argc]="$thisarg"
+	(( argc++ ))
+done
+
+
+mono  "${sonardir}/$myname"  "${cleansedargs[@]}"
+
+retcode=$?
+
+
+
+if [ "$retcode" -ne 0 ]
+then
+	logger -p user.notice -t "$myname"  "PID=$$  Warning. Exit status $retcode was non-zero"
+fi
+
+exit $retcode
