@@ -29,9 +29,9 @@
 
 - name: Update symlink {{ sonar_install_dir }}/sonar-scanner for version {{ sonar_scanner_msbuild_version }}
   file:
+    path: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_startup_script_name }}"
     state: link
-    src: "{{ sonar_scanner_find_path.files.0.path }}"
-    dest: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_startup_script_name }}"
+    src: "{{ sonar_scanner_find_path.files.0.path|dirname|dirname }}"
 
 - name: Template SonarQube.Analysis.xml
   template:
