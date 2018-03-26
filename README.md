@@ -3,7 +3,7 @@ Introduction
 
 SonarQube is a Java application which performs analysis on source code,
 to try and identify security issues, logical flaws, bad practices
-and to detect deviation from local coding standards. 
+and to detect deviation from local coding standards.
 
 It supports many languages/script, including C, C#, python, PHP, XML, CSS etc
 via extensions which can be installed via the Admin Web site.
@@ -63,7 +63,7 @@ The bamboo Remote agent should be configured with two capabilities:
     * SonarQubeScannerMSBuild - which is  normal key-value capability.
       It specifies the directory where the client has been unpacked/configured.
       Suggested location:  /opt/sonar-scanner-msbuild
-    * SonarQubeScannerMSBuild - an Executable capabiity of type MSBuild.
+    * system.builder.msbuild.SonarQubeScannerMSBuild - an Executable capabiity of type MSBuild.
       It also needs to point to the client dir, and contain a file "bin/MSBuild.SonarQube.Runner.exe"
       which is the hardcoded name that the plugin will append.
       Suggested location:  /opt/sonar-scanner-msbuild/linux
