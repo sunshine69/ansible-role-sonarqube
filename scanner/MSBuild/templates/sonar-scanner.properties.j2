@@ -8,9 +8,9 @@
 #----- Default SonarQube server
 
 #sonar.host.url=http://localhost:9000
-sonar.host.url={{ sonarqube.server.url | default("http://sonarqube.xvt.technology:9000") }}
+sonar.host.url={{ sonar_host_url }}
 
-sonar.login={{ sonarqube.logintoken | default("ANSIBLE-ERROR. Variable sonar.login is NotSet") }}
+sonar.login={{ sonar_login_token }}
 
 #----- Default source code encoding
 #sonar.sourceEncoding=UTF-8

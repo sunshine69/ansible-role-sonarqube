@@ -1,0 +1,32 @@
+# To update version etc  based on official document link below
+# https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+MSBuild
+
+# It is best to download manually the file and put it into our bitbucket
+# install storage so we have a working version tested. If upgrade then repeat
+# the process to be sure everything is tested and we leave a rollback way for
+# us.
+
+# That site list two version and we only download the dotnetcore version as it
+# can run across OS.
+# https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/4.1.1.1164/sonar-scanner-msbuild-4.1.1.1164-netcoreapp2.0.zip
+
+# The scanner needs to be match with the server as well, check the version carefully.
+
+# The server that this agent scanner will talk to
+sonar_host_url: https://sonar.xvt.technology
+
+sonar_scanner_msbuild_version: 4.0.2.892
+sonar_scanner_package_url: https://s3-ap-southeast-2.amazonaws.com/xvt-software/windows/sonar/sonar-scanner-msbuild-4.0.2.892.zip
+
+sonar_homepage: https://www.sonarqube.org/
+
+dependency_packages:
+  - mono
+
+sonar_login_token: "ANSIBLE-ERROR. Variable sonar.login is NotSet"
+sonar_scanner_install_dir: /opt/sonar-scanner-msbuild
+# The version 4.0.2.892 at least does not have a root dir and inside there are
+# a directory sonar-snaccer-3.0.3.778 and bunch of other files. Thus we need to
+# create a root dir for unziping
+sonar_scanner_extraction_dir: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}"
+sonar_scanner_startup_script_name: 'sonar-scanner'

@@ -23,9 +23,9 @@
   <!-- XVT: Locally modified:
        In the default file, the host, login and password fields are commented out.
   -->
-  <Property Name="sonar.host.url">{{ sonarqube.server.url | default("http://sonarqube.xvt.technology:9000") }}</Property>
+  <Property Name="sonar.host.url">{{ sonar_host_url }}</Property>
 
-  <Property Name="sonar.login">{{ sonarqube.logintoken | default("Ansible ERROR: sonarqube.logintoken is Not Set") }}</Property>
+  <Property Name="sonar.login">{{ sonar_login_token }}</Property>
   <Property Name="sonar.password"></Property>
 
   <!-- Required only for versions of SonarQube prior to 5.2 -->

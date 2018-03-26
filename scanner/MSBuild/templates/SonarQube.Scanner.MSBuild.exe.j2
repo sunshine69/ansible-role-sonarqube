@@ -21,15 +21,21 @@
 ##
 ## andy.jones@xvt.com.au
 
+## UPDATE
+# The next version which is not yet deployed and test - 4.1.1.1164 – Compatible
+# with SonarQube 6.7+ (LTS) - will have the dotnet core version and this
+# scripts might no longer needed or need to be totally revamped to run command
+# dotnet <path to SonarScanner.MSBuild.dll> begin /k:"project-key"
+
+# We currently have the sonar server version Version 6.7.1 (build 35068) which
+# is supported by the the scanner version 4.1.1.1164 so we will move forward to
+# this version very soon
 
 ## Config option
-sonardir="{{ sonarqube.client.msbuild.installdir | default('/opt/sonar-scanner-msbuild') }}"
+sonardir="{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}"
 ## End of Config options
 
-
-
 myname=$( basename $0 )
-
 
 logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by user $( id )"
 
