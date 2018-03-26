@@ -21,7 +21,7 @@ sonar_scanner_package_url: https://s3-ap-southeast-2.amazonaws.com/xvt-software/
 sonar_homepage: https://www.sonarqube.org/
 
 dependency_packages:
-  - mono
+  - mono-runtime
 
 sonar_login_token: "ANSIBLE-ERROR. Variable sonar.login is NotSet"
 sonar_scanner_install_dir: /opt/sonar-scanner-msbuild
