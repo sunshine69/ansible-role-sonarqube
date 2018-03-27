@@ -20,19 +20,6 @@
     group: root
     mode: 0755
 
-- name: Find the sonar-scanner - SonarQube Scanner Startup Script for Unix
-  find:
-    paths: "{{ sonar_scanner_extraction_dir }}"
-    patterns: '{{ sonar_scanner_startup_script_name }}'
-    recurse: yes
-  register: sonar_scanner_find_path
-
-- name: Update symlink {{ sonar_install_dir }}/sonar-scanner for version {{ sonar_scanner_msbuild_version }}
-  file:
-    path: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_startup_script_name }}"
-    state: link
-    src: "{{ sonar_scanner_find_path.files.0.path|dirname|dirname }}"
-
 - name: Template SonarQube.Analysis.xml
   template:
     src: "SonarQube.Analysis.xml.j2"
@@ -53,31 +40,37 @@
     backup: yes
   register: sonarqube_replace_sonarproperties_file_output
 
-# The bamboo agent has cap system.builder.msbuild.SonarQubeScannerMSBuild=/opt/sonar-scanner-msbuild/linux
-# The build plan will use that path fine bin/SonarQube.Scanner.MSBuild.exe for the executable path
-# We will deploy the wrapper script to run mono for this executable file
+# Until now we have a working deployment already. Run
+# mono /opt/sonar-scanner-msbuild/${bamboo_sonar_scanner_msbuild_version}/SonarQube.Scanner.MSBuild.exe
+# should work
+
+# The part below is a try to make the bamboo built in SonarQube system to find
+# the executable and passing params. These are not well documented in bamboo and
+# does not support per-branch scanning so currently we use the manualy scan
+# command in bamboo script to start and end the scanning job. Thus these
+# deployment below are not a must at all as of this time
+
+# Leave it here - we might go back to use this one day
 
 - name: Create directory to hold the Linux shim script, which the Bamboo plugin hardcodes
   file:
     state: directory
-    path: "{{ sonar_scanner_install_dir }}/linux/bin"
+    path: "{{ sonar_scanner_extraction_dir }}/linux/bin"
     owner: root
     group: root
     mode: 0755
 
-# I do not know why we have to deploy as the name MSBuild.SonarQube.Runner.exe
-# and then symbolic it to SonarQube.Scanner.MSBuild.exe in the current bamboo
-# server. Thus I set directly to SonarQube.Scanner.MSBuild.exe for now
-- name: Create shim shell script (SonarQube.Scanner.MSBuild.exe) which uses mono to invoke the real EXE
+# The built-in bamboo find the exec using the capabilities path and then
+# linux/bin/MSBuild.SonarQube.Runner.exe
+# Thus we deploy the wrapper here which execute mono with the real exe file.
+
+# No guarantee the exe name in dest is correct - if someone tries to use the
+# built in - good luck
+
+- name: Create shim shell script (MSBuild.SonarQube.Runner.exe) which uses mono to invoke the real EXE
   template:
-    src: "SonarQube.Scanner.MSBuild.exe.j2"
-    dest: "{{ sonar_scanner_install_dir }}/linux/bin/SonarQube.Scanner.MSBuild.exe"
+    src: "SonarScanner.MSBuild.exe.j2"
+    dest: "{{ sonar_scanner_extraction_dir }}/linux/bin/MSBuild.SonarQube.Runner.exe"
     owner: root
     group: root
     mode: 0755
-
-- name: Create symlink to MSBuild.SonarQube.Runner.exe
-  file:
-    path: "{{ sonar_scanner_install_dir }}/linux/bin/MSBuild.SonarQube.Runner.exe"
-    src: "{{ sonar_scanner_install_dir }}/linux/bin/SonarQube.Scanner.MSBuild.exe"
-    state: link
