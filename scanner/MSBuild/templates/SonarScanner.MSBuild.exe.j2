@@ -21,20 +21,13 @@
 ##
 ## andy.jones@xvt.com.au
 
-## UPDATE
-# The next version which is not yet deployed and test - 4.1.1.1164 – Compatible
-# with SonarQube 6.7+ (LTS) - will have the dotnet core version and this
-# scripts might no longer needed or need to be totally revamped to run command
-# dotnet <path to SonarScanner.MSBuild.dll> begin /k:"project-key"
-
-# We currently have the sonar server version Version 6.7.1 (build 35068) which
-# is supported by the the scanner version 4.1.1.1164 so we will move forward to
-# this version very soon
-
 ## Config option
-sonardir="{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}"
+sonardir="{{ sonar_scanner_extraction_dir }}"
 ## End of Config options
 
+# I will use myname to find out the real exe to execute. Thus myname is
+# important and must be matched with what the real exe file name. Again as I am
+# a template thus I have an extra .j2.
 myname=$( basename $0 )
 
 logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by user $( id )"
@@ -60,7 +53,6 @@ fi
 ## The shortest, but non-preferred option, is to just invoke this 'eval'....
 #eval  mono  "${sonardir}/$myname"  "$@"
 
-
 ## Since eval should always be a last resort, then let's use bash arrays instead
 cleansedargs=()
 argc=0
@@ -71,12 +63,11 @@ do
 	(( argc++ ))
 done
 
+echo "Sonar Execution command: \"${sonardir}/$myname\"  \"${cleansedargs[@]}\""
 
 mono  "${sonardir}/$myname"  "${cleansedargs[@]}"
 
 retcode=$?
-
-
 
 if [ "$retcode" -ne 0 ]
 then
