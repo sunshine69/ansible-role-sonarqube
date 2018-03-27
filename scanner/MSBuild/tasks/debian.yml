@@ -17,7 +17,7 @@
     remote_src: yes
     dest: "{{ sonar_scanner_extraction_dir }}"
     owner: root
-    group: root
+    group: "{{ bamboo_group|default('root') }}"
     mode: 0755
 
 - name: Template SonarQube.Analysis.xml
@@ -25,8 +25,8 @@
     src: "SonarQube.Analysis.xml.j2"
     dest: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}/SonarQube.Analysis.xml"
     owner: "root"
-    group: "root"
-    mode: 0644
+    group: "{{ bamboo_group|default('root') }}"
+    mode: 0640
     backup: yes
   register: sonarqube_replace_analysis_file_output
 
@@ -42,8 +42,8 @@
     src: "sonar-scanner.properties.j2"
     dest: "{{ sonar_scanner_find_path.files.0.path|dirname }}/../conf/sonar-scanner.properties"
     owner: "root"
-    group: "root"
-    mode: 0644
+    group: "{{ bamboo_group|default('root') }}"
+    mode: 0640
     backup: yes
   register: sonarqube_replace_sonarproperties_file_output
 
@@ -64,7 +64,7 @@
     state: directory
     path: "{{ sonar_scanner_extraction_dir }}/linux/bin"
     owner: root
-    group: root
+    group: "{{ bamboo_group|default('root') }}"
     mode: 0755
 
 # The built-in bamboo find the exec using the capabilities path and then
@@ -79,5 +79,5 @@
     src: "SonarScanner.MSBuild.exe.j2"
     dest: "{{ sonar_scanner_extraction_dir }}/linux/bin/MSBuild.SonarQube.Runner.exe"
     owner: root
-    group: root
+    group: "{{ bamboo_group|default('root') }}"
     mode: 0755
