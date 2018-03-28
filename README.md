@@ -139,7 +139,7 @@ via mono (https://www.mono-project.com/).
 
 * `sonar_scanner_property_file_name` - Optional - Default: sonar-scanner.properties
 
-   We will use anisble find module to find out where the file name is and
+   We will use ansible find module to find out where the file name is and
    then template it using our template to configure the scanner.
 
 

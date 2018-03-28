@@ -27,10 +27,9 @@
 sonardir="{{ sonar_scanner_extraction_dir }}"
 ## End of Config options
 
-# added the comemnt text by stevek
-# I will use myname to find out the real exe to execute. Thus myname is
-# important and must be matched with what the real exe file name. Again as I am
-# a template thus I have an extra .j2.
+# The wrapper script after templated *must* have the same name as the real
+# executable released by the vendor in the sonar home dir. I am going to parse
+# that script name here to find out the real executable file.
 myname=$( basename $0 )
 
 logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by user $( id )"
