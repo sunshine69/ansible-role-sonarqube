@@ -19,17 +19,18 @@
 ## eg. set the sonarscanner location to  /opt/sonar-scanner-msbuild/linux
 ##     and then put this file in the dir /opt/sonar-scanner-msbuild/linux/bin
 ##
-## andy.jones@xvt.com.au
 
+## andy.jones@xvt.com.au
+## steve.kieu@xvt.com.au
 
 ## Config option
-sonardir="{{ sonarqube.client.msbuild.installdir | default('/opt/sonar-scanner-msbuild') }}"
+sonardir="{{ sonar_scanner_extraction_dir }}"
 ## End of Config options
 
-
-
+# The wrapper script after templated *must* have the same name as the real
+# executable released by the vendor in the sonar home dir. I am going to parse
+# that script name here to find out the real executable file.
 myname=$( basename $0 )
-
 
 logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by user $( id )"
 
@@ -37,7 +38,7 @@ logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by
 ## NB: Would prefer to log the actual args ($*), but they might contain a user token... (/d:sonar.login=...)
 if [ -f "${sonardir}/$myname" ]
 then
-	logger -p user.debug -t "$myname"  "PID=$$  Will use mono to execute $myname with $# args"
+    logger -p user.debug -t "$myname"  "PID=$$  Will use mono to execute $myname with $# args: $*"
 else
 	logger -p user.notice -t "$myname"  "PID=$$  Warning: EXE file ($myname) does not to exist in dir \"$sonardir\". Will try and fail to execute it with $# args"
 fi
@@ -54,7 +55,6 @@ fi
 ## The shortest, but non-preferred option, is to just invoke this 'eval'....
 #eval  mono  "${sonardir}/$myname"  "$@"
 
-
 ## Since eval should always be a last resort, then let's use bash arrays instead
 cleansedargs=()
 argc=0
@@ -65,12 +65,11 @@ do
 	(( argc++ ))
 done
 
+logger -p user.debug -t "$myname" "PID=$$ Sonar Execution command: \"${sonardir}/$myname\"  \"${cleansedargs[@]}\""
 
 mono  "${sonardir}/$myname"  "${cleansedargs[@]}"
 
 retcode=$?
-
-
 
 if [ "$retcode" -ne 0 ]
 then
