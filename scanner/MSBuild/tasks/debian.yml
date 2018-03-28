@@ -20,10 +20,17 @@
     group: "{{ bamboo_group|default('root') }}"
     mode: 0755
 
+- name: Make {{ sonar_scanner_install_dir }} symlink
+  file:
+    path: "{{ sonar_scanner_install_dir }}"
+    state: link
+    src: "{{ sonar_scanner_extraction_dir }}"
+    force: yes
+
 - name: Template SonarQube.Analysis.xml
   template:
     src: "SonarQube.Analysis.xml.j2"
-    dest: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}/SonarQube.Analysis.xml"
+    dest: "{{ sonar_scanner_extraction_dir }}/SonarQube.Analysis.xml"
     owner: "root"
     group: "{{ bamboo_group|default('root') }}"
     mode: 0640
@@ -33,14 +40,14 @@
 - name: Find the sonar-scanner - SonarQube Scanner Startup Script for Unix
   find:
     paths: "{{ sonar_scanner_extraction_dir }}"
-    patterns: '{{ sonar_scanner_startup_script_name }}'
+    patterns: '{{ sonar_scanner_property_file_name }}'
     recurse: yes
   register: sonar_scanner_find_path
 
 - name: Template sonar-scanner.properties file
   template:
     src: "sonar-scanner.properties.j2"
-    dest: "{{ sonar_scanner_find_path.files.0.path|dirname }}/../conf/sonar-scanner.properties"
+    dest: "{{ sonar_scanner_find_path.files.0.path }}"
     owner: "root"
     group: "{{ bamboo_group|default('root') }}"
     mode: 0640

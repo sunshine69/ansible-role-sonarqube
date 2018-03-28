@@ -38,5 +38,5 @@ sonar_scanner_install_dir: /opt/sonar-scanner-msbuild
 # The version 4.0.2.892 at least does not have a root dir and inside there are
 # a directory sonar-snaccer-3.0.3.778 and bunch of other files. Thus we need to
 # create a root dir for unziping
-sonar_scanner_extraction_dir: "{{ sonar_scanner_install_dir }}/{{ sonar_scanner_msbuild_version }}"
-sonar_scanner_startup_script_name: sonar-scanner
+sonar_scanner_extraction_dir: "{{ sonar_scanner_install_dir }}-{{ sonar_scanner_msbuild_version }}"
+sonar_scanner_property_file_name: sonar-scanner.properties
