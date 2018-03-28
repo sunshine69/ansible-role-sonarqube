@@ -38,7 +38,7 @@ logger -p user.debug -t "$myname"  "PID=$$  Script ($0) invoked in dir $(pwd) by
 ## NB: Would prefer to log the actual args ($*), but they might contain a user token... (/d:sonar.login=...)
 if [ -f "${sonardir}/$myname" ]
 then
-	logger -p user.debug -t "$myname"  "PID=$$  Will use mono to execute $myname with $# args"
+    logger -p user.debug -t "$myname"  "PID=$$  Will use mono to execute $myname with $# args: $*"
 else
 	logger -p user.notice -t "$myname"  "PID=$$  Warning: EXE file ($myname) does not to exist in dir \"$sonardir\". Will try and fail to execute it with $# args"
 fi
@@ -65,7 +65,7 @@ do
 	(( argc++ ))
 done
 
-echo "Sonar Execution command: \"${sonardir}/$myname\"  \"${cleansedargs[@]}\""
+logger -p user.debug -t "$myname" "PID=$$ Sonar Execution command: \"${sonardir}/$myname\"  \"${cleansedargs[@]}\""
 
 mono  "${sonardir}/$myname"  "${cleansedargs[@]}"
 
