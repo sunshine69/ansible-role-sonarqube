@@ -1,10 +1,9 @@
 - name: Install dependency_packages
   apt:
-    name: "{{ item }}"
+    name: "{{ dependency_packages }}"
     state: "present"
     update_cache: yes
     cache_valid_time: 600
-  with_items: "{{ dependency_packages }}"
 
 - name: Make sure {{ sonar_scanner_extraction_dir }} exists
   file:
