@@ -1,0 +1,43 @@
+---
+- name: Bring up docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_sonarqube_scanner_MSBuild
+    ct_image: "ubuntu:16.04"
+    ct_command: "sleep infinity"
+
+  tasks:
+    - docker_container:
+        name: "{{ ct_name }}"
+        image: "{{ ct_image }}"
+        command: "{{ ct_command }}"
+    - add_host:
+        name: "{{ ct_name }}"
+
+- hosts: test_role_sonarqube_scanner_MSBuild
+  remote_user: root
+  connection: docker
+  gather_facts: no
+  tasks:
+    - raw: "apt update && apt -y install python unzip zip bzip2 curl apt-transport-https"
+
+- hosts: test_role_sonarqube_scanner_MSBuild
+  remote_user: root
+  connection: docker
+  vars:
+    ubuntu_version_codename: xenial
+    dotnet_version: 2.1.4
+  roles:
+    - MSBuild
+
+- name: Shutdown docker container
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ct_name: test_role_sonarqube_scanner_MSBuild
+
+  tasks:
+    - docker_container:
+        name: "{{ ct_name }}"
+        state: absent
